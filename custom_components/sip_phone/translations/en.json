@@ -1,0 +1,32 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "name": "Name",
+          "sip_domain": "SIP server domain or address",
+          "default_account": "SIP account number",
+          "command_topic": "MQTT command topic",
+          "event_topic": "MQTT call event topic"
+        },
+        "description": "Connect a configured SIP extension gateway through MQTT."
+      }
+    },
+    "error": {"invalid_connection": "Use a SIP server address and MQTT topics without wildcard characters."},
+    "abort": {"already_configured": "This SIP extension gateway is already configured."}
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "name": "Name",
+          "sip_domain": "SIP server domain or address",
+          "default_account": "SIP account number",
+          "command_topic": "MQTT command topic",
+          "event_topic": "MQTT call event topic"
+        }
+      }
+    },
+    "error": {"invalid_connection": "Use a SIP server address and MQTT topics without wildcard characters."}
+  }
+}

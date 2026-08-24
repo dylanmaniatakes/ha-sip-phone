@@ -1,0 +1,11 @@
+{
+  "domain": "sip_phone",
+  "name": "SIP Phone",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": ["mqtt"],
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "requirements": [],
+  "version": "0.1.0"
+}

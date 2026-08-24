@@ -1,0 +1,121 @@
+dial:
+  name: Dial
+  description: Start an outgoing call from a configured SIP extension.
+  fields:
+    destination:
+      name: Destination
+      description: An extension, a user@host address, or a full SIP URI.
+      required: true
+      selector:
+        text:
+    entry_id:
+      name: SIP Phone entry
+      description: Required only when more than one SIP Phone entry is configured.
+      selector:
+        config_entry:
+          integration: sip_phone
+    sip_account:
+      name: SIP account
+      selector:
+        number:
+          min: 1
+          max: 3
+          mode: box
+    ring_timeout:
+      name: Ring timeout
+      description: Seconds to ring before ending the call.
+      selector:
+        number:
+          min: 1
+          max: 3600
+          unit_of_measurement: seconds
+          mode: box
+hangup:
+  name: Hang up
+  description: End a ringing or connected SIP call.
+  fields:
+    destination:
+      name: Destination
+      description: The same extension, address, or SIP URI used to start the call.
+      required: true
+      selector:
+        text:
+    entry_id:
+      name: SIP Phone entry
+      selector:
+        config_entry:
+          integration: sip_phone
+    sip_account:
+      name: SIP account
+      selector:
+        number:
+          min: 1
+          max: 3
+          mode: box
+    sip_code:
+      name: SIP response code
+      description: Optional response code for an unanswered call.
+      selector:
+        number:
+          min: 0
+          max: 699
+          mode: box
+answer:
+  name: Answer
+  description: Answer an incoming SIP call.
+  fields:
+    destination:
+      name: Call identifier
+      description: The incoming call internal_id from the sip_phone.call_event event.
+      required: true
+      selector:
+        text:
+    entry_id:
+      name: SIP Phone entry
+      selector:
+        config_entry:
+          integration: sip_phone
+    sip_account:
+      name: SIP account
+      selector:
+        number:
+          min: 1
+          max: 3
+          mode: box
+send_dtmf:
+  name: Send DTMF
+  description: Send DTMF digits to an active SIP call.
+  fields:
+    destination:
+      name: Destination
+      description: The same extension, address, or SIP URI used to start the call.
+      required: true
+      selector:
+        text:
+    digits:
+      name: Digits
+      description: Digits including 0-9, star, and hash as supported by the SIP gateway.
+      required: true
+      selector:
+        text:
+    method:
+      name: Method
+      default: rfc2833
+      selector:
+        select:
+          options:
+            - in_band
+            - rfc2833
+            - sip_info
+    entry_id:
+      name: SIP Phone entry
+      selector:
+        config_entry:
+          integration: sip_phone
+    sip_account:
+      name: SIP account
+      selector:
+        number:
+          min: 1
+          max: 3
+          mode: box
