@@ -1,0 +1,44 @@
+{
+  "configuration": {
+    "sip_global": {
+      "name": "SIP network settings",
+      "description": "Network settings for the local SIP gateway.",
+      "fields": {
+        "port": {"name": "Local SIP port"},
+        "log_level": {"name": "SIP log level"},
+        "name_server": {"name": "DNS servers"},
+        "cache_dir": {"name": "Audio cache directory"},
+        "global_options": {"name": "Advanced PJSIP options"}
+      }
+    },
+    "mqtt": {
+      "name": "Home Assistant MQTT connection",
+      "description": "Use the MQTT broker already configured for Home Assistant. The default host works with the official Mosquitto app.",
+      "fields": {
+        "enabled": {"name": "Enable MQTT control"},
+        "host": {"name": "MQTT broker host"},
+        "port": {"name": "MQTT broker port"},
+        "username": {"name": "MQTT username"},
+        "password": {"name": "MQTT password"},
+        "command_topic": {"name": "Command topic"},
+        "event_topic": {"name": "Call event topic"}
+      }
+    },
+    "sip": {
+      "name": "Primary SIP extension",
+      "description": "Enter the extension issued by the local SIP server. Password fields are stored by Home Assistant as app configuration and are never sent to the HACS integration.",
+      "fields": {
+        "enabled": {"name": "Enable this extension"},
+        "registrar_uri": {"name": "SIP registrar URI"},
+        "id_uri": {"name": "Extension SIP URI"},
+        "realm": {"name": "Authentication realm"},
+        "user_name": {"name": "Extension username"},
+        "password": {"name": "Extension password"},
+        "answer_mode": {"name": "Incoming-call mode"},
+        "settle_time": {"name": "Call settle time"},
+        "incoming_call_file": {"name": "Incoming-call menu file"},
+        "options": {"name": "Advanced extension options"}
+      }
+    }
+  }
+}

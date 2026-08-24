@@ -1,8 +1,8 @@
 # SIP Phone for Home Assistant
 
-SIP Phone makes a local SIP extension available to Home Assistant automations through native actions, events, and a call-status entity. It is a HACS custom integration and uses an MQTT-enabled SIP gateway to handle SIP registration and media.
+SIP Phone makes a local SIP extension available to Home Assistant automations through native actions, events, and a call-status entity. The repository contains both a Home Assistant app that registers the extension and a HACS integration that provides the friendly Home Assistant control surface.
 
-The integration is designed for an on-premises PBX or SIP server that assigns extensions. It never sends SIP credentials to Home Assistant; those remain in the SIP gateway configuration.
+The project is designed for an on-premises PBX or SIP server that assigns extensions. SIP username and password are entered as protected fields in the **SIP Phone Gateway** app configuration. They are used only by the gateway; the HACS integration does not store or transmit them.
 
 ## Features
 
@@ -10,34 +10,29 @@ The integration is designed for an on-premises PBX or SIP server that assigns ex
 - `sip_phone.hangup`, `sip_phone.answer`, and `sip_phone.send_dtmf` actions.
 - A `sensor` entity for each configured extension with `idle`, `ringing`, or `connected` state.
 - `sip_phone.call_event` events containing the SIP gateway's call payload.
-- A config flow that asks only for a friendly name, SIP server address, account number, and MQTT topics.
+- Protected text inputs for registrar URI, extension URI, username, and password in the SIP gateway app.
+- A HACS config flow with text fields for the server address, account slot, and MQTT topics.
 
 ## Requirements
 
-1. Home Assistant with the MQTT integration connected to a local broker.
-2. A SIP gateway registered as an extension on the local SIP server.
-3. Gateway MQTT command and state events enabled.
+1. Home Assistant OS or Supervised to use the included SIP Phone Gateway app. Home Assistant Container or Core can use a separately deployed compatible gateway.
+2. The MQTT integration connected to a local broker.
+3. An extension username, password, and SIP registrar URI issued by the local SIP server.
 
-[ha-sip](https://github.com/arnonym/ha-plugins) is a compatible Home Assistant add-on and supplies the SIP/PJSIP runtime. Enable its MQTT feature with matching command and state topics. The default topics used by both projects are:
+The included gateway is based on the Apache-2.0 licensed [ha-sip](https://github.com/arnonym/ha-plugins) PJSIP implementation, updated with direct password fields and a dedicated MQTT section. The default topics are:
 
 ```yaml
 command_topic: hasip/execute
 event_topic: hasip/state
 ```
 
-For ha-sip, add this to `sip_global.global_options`, alongside the correct local broker details:
-
-```text
---enable-mqtt --mqtt-address core-mosquitto --mqtt-port 1883 --mqtt-topic hasip/execute --mqtt-state-topic hasip/state
-```
-
-Configure SIP credentials only in the gateway. SIP Phone selects the configured account by number and does not duplicate or store its password.
+Configure **SIP Phone Gateway** first. In its **Primary SIP extension** section, enter the registrar URI, extension URI, extension username, and extension password. In **Home Assistant MQTT connection**, enter the broker credentials and keep the topics matched to the HACS integration. Full gateway configuration is in [DOCS.md](/Users/ticnitsi/Documents/ha-sip-phone/addon/sip_phone_gateway/DOCS.md).
 
 ## Installation
 
-1. In HACS, add this repository as a custom repository of type **Integration**.
-2. Download **SIP Phone** and restart Home Assistant.
-3. Go to **Settings → Devices & services → Add integration**, select **SIP Phone**, and enter the SIP server address and account number used by the gateway.
+1. For Home Assistant OS or Supervised, add this repository in **Settings → Apps → App store → More → Repositories**, then install and start **SIP Phone Gateway**. It presents text inputs for the SIP registrar, extension username, and password.
+2. In HACS, add this repository as a custom repository of type **Integration**, download **SIP Phone**, and restart Home Assistant.
+3. Go to **Settings → Devices & services → Add integration**, select **SIP Phone**, and enter the server address, gateway account slot, and matching MQTT topics. The account slot is a text field, not a slider.
 
 ## Automation actions
 
@@ -104,7 +99,7 @@ data:
 
 ## Design and limits
 
-This repository is intentionally a HACS integration, not a second SIP media stack. The SIP gateway owns extension registration, codec negotiation, RTP media, and credentials; SIP Phone provides Home Assistant-native control through MQTT. This supports Home Assistant OS, Supervised, Container, and Core installations as long as the compatible gateway is reachable.
+The **SIP Phone Gateway** app owns extension registration, codec negotiation, RTP media, and credentials; the **SIP Phone** HACS integration provides Home Assistant-native control through MQTT. This separates credential-bearing SIP transport from the automation UI and allows Container and Core installations to use a separately deployed compatible gateway.
 
 The status sensor reflects gateway events. It is `idle` until an event is received after Home Assistant starts, so it is a call indicator rather than a SIP registration-health check.
 

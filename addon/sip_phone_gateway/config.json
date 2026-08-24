@@ -1,0 +1,165 @@
+{
+    "name": "SIP Phone Gateway",
+    "version": "0.1.0",
+    "slug": "sip_phone_gateway",
+    "description": "Registers a Home Assistant extension with a SIP server and exposes it through MQTT.",
+    "arch": [
+        "aarch64",
+        "amd64"
+    ],
+    "init": "false",
+    "startup": "application",
+    "boot": "auto",
+    "options": {
+        "sip_global": {
+            "port": 5060,
+            "log_level": 5,
+            "name_server": "",
+            "cache_dir": "",
+            "global_options": ""
+        },
+        "mqtt": {
+            "enabled": true,
+            "host": "core-mosquitto",
+            "port": 1883,
+            "username": "",
+            "password": "",
+            "command_topic": "hasip/execute",
+            "event_topic": "hasip/state"
+        },
+        "sip": {
+            "enabled": true,
+            "registrar_uri": "sip:pbx.local",
+            "id_uri": "sip:extension@pbx.local",
+            "realm": "*",
+            "user_name": "extension",
+            "password": "",
+            "answer_mode": "listen",
+            "settle_time": 1,
+            "incoming_call_file": "",
+            "options": ""
+        },
+        "sip_2": {
+            "enabled": false,
+            "registrar_uri": "sip:pbx.local",
+            "id_uri": "",
+            "realm": "*",
+            "user_name": "",
+            "password": "",
+            "answer_mode": "listen",
+            "settle_time": 1,
+            "incoming_call_file": "",
+            "options": ""
+        },
+        "sip_3": {
+            "enabled": false,
+            "registrar_uri": "sip:pbx.local",
+            "id_uri": "",
+            "realm": "*",
+            "user_name": "",
+            "password": "",
+            "answer_mode": "listen",
+            "settle_time": 1,
+            "incoming_call_file": "",
+            "options": ""
+        },
+        "tts": {
+            "engine_id": "",
+            "platform": "",
+            "language": "",
+            "voice": "",
+            "debug_print": false
+        },
+        "webhook": {
+            "id": "sip_call_webhook_id"
+        },
+        "sensors": {
+            "enabled": false,
+            "entity_prefix": "ha_sip"
+        }
+    },
+    "schema": {
+        "sip_global": {
+            "port": "int",
+            "log_level": "int",
+            "name_server": "str",
+            "cache_dir": "str",
+            "global_options": "str"
+        },
+        "mqtt": {
+            "enabled": "bool",
+            "host": "str",
+            "port": "port",
+            "username": "str?",
+            "password": "password?",
+            "command_topic": "str",
+            "event_topic": "str"
+        },
+        "sip": {
+            "enabled": "bool",
+            "registrar_uri": "str",
+            "id_uri": "str",
+            "realm": "str",
+            "user_name": "str",
+            "password": "password",
+            "answer_mode": "list(listen|accept|reject)",
+            "settle_time": "float",
+            "incoming_call_file": "str",
+            "options": "str"
+        },
+        "sip_2": {
+            "enabled": "bool",
+            "registrar_uri": "str",
+            "id_uri": "str",
+            "realm": "str",
+            "user_name": "str",
+            "password": "password",
+            "answer_mode": "list(listen|accept|reject)",
+            "settle_time": "float",
+            "incoming_call_file": "str",
+            "options": "str"
+        },
+        "sip_3": {
+            "enabled": "bool",
+            "registrar_uri": "str",
+            "id_uri": "str",
+            "realm": "str",
+            "user_name": "str",
+            "password": "password",
+            "answer_mode": "list(listen|accept|reject)",
+            "settle_time": "float",
+            "incoming_call_file": "str",
+            "options": "str"
+        },
+        "tts": {
+            "platform": "str?",
+            "engine_id": "str?",
+            "language": "str",
+            "voice": "str?",
+            "debug_print": "bool?"
+        },
+        "webhook": {
+            "id": "str"
+        },
+        "sensors": {
+            "enabled": "bool",
+            "entity_prefix": "str"
+        }
+    },
+    "host_network": true,
+    "homeassistant_api": true,
+    "hassio_api": false,
+    "stdin": true,
+    "map": [
+        {
+            "type": "homeassistant_config",
+            "read_only": false,
+            "path": "/config"
+        },
+        {
+            "type": "media",
+            "read_only": false,
+            "path": "/media"
+        }
+    ]
+}

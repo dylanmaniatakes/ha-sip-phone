@@ -1,0 +1,5 @@
+SIP Phone Gateway includes a modified copy of ha-sip from
+https://github.com/arnonym/ha-plugins (Apache License 2.0).
+
+The upstream source and its Apache-2.0 license are included in
+addon/sip_phone_gateway.

@@ -9,10 +9,10 @@
           "command_topic": "MQTT command topic",
           "event_topic": "MQTT call event topic"
         },
-        "description": "Connect a configured SIP extension gateway through MQTT."
+        "description": "Connect the SIP Phone Gateway add-on through MQTT. Configure the SIP extension username and password in the add-on, then enter the same server address and account slot here."
       }
     },
-    "error": {"invalid_connection": "Use a SIP server address and MQTT topics without wildcard characters."},
+    "error": {"invalid_connection": "Use a SIP server address, account slot 1 to 3, and MQTT topics without wildcard characters."},
     "abort": {"already_configured": "This SIP extension gateway is already configured."}
   },
   "options": {
@@ -27,6 +27,6 @@
         }
       }
     },
-    "error": {"invalid_connection": "Use a SIP server address and MQTT topics without wildcard characters."}
+    "error": {"invalid_connection": "Use a SIP server address, account slot 1 to 3, and MQTT topics without wildcard characters."}
   }
 }
