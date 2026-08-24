@@ -1,6 +1,6 @@
 {
     "name": "SIP Phone Gateway",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "slug": "sip_phone_gateway",
     "description": "Registers a Home Assistant extension with a SIP server and exposes it through MQTT.",
     "arch": [

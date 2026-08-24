@@ -5,11 +5,12 @@
         "data": {
           "name": "Name",
           "sip_domain": "SIP server domain or address",
+          "assistant_uri": "Home Assistant Assist SIP URI",
           "default_account": "SIP account number",
           "command_topic": "MQTT command topic",
           "event_topic": "MQTT call event topic"
         },
-        "description": "Connect the SIP Phone Gateway add-on through MQTT. Configure the SIP extension username and password in the add-on, then enter the same server address and account slot here."
+        "description": "Connect the SIP Phone Gateway add-on through MQTT. Configure the SIP extension username and password in the add-on, then enter the same server address and account slot here. The optional Assist URI is the Home Assistant Voice over IP endpoint used by connect_assist."
       }
     },
     "error": {"invalid_connection": "Use a SIP server address, account slot 1 to 3, and MQTT topics without wildcard characters."},
@@ -21,6 +22,7 @@
         "data": {
           "name": "Name",
           "sip_domain": "SIP server domain or address",
+          "assistant_uri": "Home Assistant Assist SIP URI",
           "default_account": "SIP account number",
           "command_topic": "MQTT command topic",
           "event_topic": "MQTT call event topic"

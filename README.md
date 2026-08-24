@@ -8,6 +8,8 @@ The project is designed for an on-premises PBX or SIP server that assigns extens
 
 - `sip_phone.dial` accepts a simple extension (`201`), an address (`201@pbx.local`), or a full SIP URI.
 - `sip_phone.hangup`, `sip_phone.answer`, and `sip_phone.send_dtmf` actions.
+- `sip_phone.announce` to call an extension, play an optional chime, speak a message, and hang up.
+- `sip_phone.connect_assist` to answer a call to the Home Assistant extension and bridge it to Assist.
 - A `sensor` entity for each configured extension with `idle`, `ringing`, or `connected` state.
 - `sip_phone.call_event` events containing the SIP gateway's call payload.
 - Protected text inputs for registrar URI, extension URI, username, and password in the SIP gateway app.
@@ -71,6 +73,42 @@ data:
   digits: "123#"
   method: rfc2833
 ```
+
+## Call announcements and Chime TTS
+
+`sip_phone.announce` calls the destination, plays an optional chime first, speaks the message through the gateway's configured TTS engine, and hangs up after playback.
+
+```yaml
+action: sip_phone.announce
+data:
+  destination: "201"
+  chime_file: /media/chime_tts/custom_chimes/bell.mp3
+  message: "The front door has opened."
+```
+
+The gateway can play `.wav` and `.mp3` files from `/media`. Chime TTS supports custom chimes in Home Assistant's media folder, so a Chime TTS chime path can be used directly as `chime_file`. Chime TTS itself is not required for spoken SIP announcements; the gateway uses the TTS engine configured in the SIP Phone Gateway app.
+
+## Home Assistant Assist over SIP
+
+To make a call to the Home Assistant extension and talk with Assist:
+
+1. Set up Home Assistant's **Voice over IP** integration with a dedicated SIP username and a local port different from the SIP Phone Gateway port (for example, `5070`). Enable incoming calls for the resulting device.
+2. In the SIP Phone integration options, set **Home Assistant Assist SIP URI** to that endpoint, such as `sip:assist@192.168.1.10:5070`.
+3. Create an automation that connects each incoming SIP call to Assist:
+
+```yaml
+trigger:
+  - trigger: event
+    event_type: sip_phone.call_event
+    event_data:
+      event: incoming_call
+action:
+  - action: sip_phone.connect_assist
+    data:
+      destination: "{{ trigger.event.data.internal_id }}"
+```
+
+Use a condition on `trigger.event.data.parsed_remote_uri` if only selected callers should reach Assist. `connect_assist` answers the call, dials the configured Home Assistant Voice over IP endpoint, waits for it to answer, then bridges the two audio streams.
 
 ## Incoming calls
 

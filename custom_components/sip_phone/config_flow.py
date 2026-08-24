@@ -10,8 +10,8 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.selector import TextSelector
 
 from .const import (
-    CONF_COMMAND_TOPIC, CONF_DEFAULT_ACCOUNT, CONF_EVENT_TOPIC, CONF_NAME, CONF_SIP_DOMAIN,
-    DEFAULT_COMMAND_TOPIC, DEFAULT_EVENT_TOPIC, DEFAULT_NAME, DEFAULT_SIP_ACCOUNT, DOMAIN,
+    CONF_ASSISTANT_URI, CONF_COMMAND_TOPIC, CONF_DEFAULT_ACCOUNT, CONF_EVENT_TOPIC, CONF_NAME, CONF_SIP_DOMAIN,
+    DEFAULT_ASSISTANT_URI, DEFAULT_COMMAND_TOPIC, DEFAULT_EVENT_TOPIC, DEFAULT_NAME, DEFAULT_SIP_ACCOUNT, DOMAIN,
 )
 
 
@@ -21,6 +21,7 @@ def _schema(defaults: dict[str, Any] | None = None) -> vol.Schema:
     return vol.Schema({
         vol.Required(CONF_NAME, default=defaults.get(CONF_NAME, DEFAULT_NAME)): str,
         vol.Required(CONF_SIP_DOMAIN, default=defaults.get(CONF_SIP_DOMAIN, "")): str,
+        vol.Required(CONF_ASSISTANT_URI, default=defaults.get(CONF_ASSISTANT_URI, DEFAULT_ASSISTANT_URI)): str,
         vol.Required(CONF_DEFAULT_ACCOUNT, default=str(defaults.get(CONF_DEFAULT_ACCOUNT, DEFAULT_SIP_ACCOUNT))): TextSelector(),
         vol.Required(CONF_COMMAND_TOPIC, default=defaults.get(CONF_COMMAND_TOPIC, DEFAULT_COMMAND_TOPIC)): str,
         vol.Required(CONF_EVENT_TOPIC, default=defaults.get(CONF_EVENT_TOPIC, DEFAULT_EVENT_TOPIC)): str,

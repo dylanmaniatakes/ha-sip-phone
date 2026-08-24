@@ -88,6 +88,7 @@ class Call(pj.Call):
         self.call_info: Optional[webhook.CallInfo] = None
         self.pressed_digit_list: List[str] = []
         self.current_playback: Optional[ha.CurrentPlayback] = None
+        self.pending_message: Optional[tuple[str, str, bool, bool]] = None
 
         self.callback_id, other_ids = self.get_callback_ids()
         self.menu, self.menu_map = normalize_menu(menu, self.ha_config.tts_config['language'], self.account.config.index)
@@ -285,17 +286,25 @@ class Call(pj.Call):
         message = menu['message']
         handle_as_template = menu['handle_as_template']
         audio_file = menu['audio_file']
+        pre_audio_file = menu['pre_audio_file']
         language = menu['language']
         action = menu['action']
         post_action = menu['post_action']
         should_cache = menu['cache_audio']
         wait_for_audio_to_finish = menu['wait_for_audio_to_finish']
-        if message:
+        if pre_audio_file and message:
+            if handle_as_template:
+                message = ha.render_template(self.ha_config, message)
+            self.pending_message = (message, language, should_cache, wait_for_audio_to_finish)
+            self.play_audio_file(pre_audio_file, should_cache, True)
+        elif message:
             if handle_as_template:
                 message = ha.render_template(self.ha_config, message)
             self.play_message(message, language, should_cache, wait_for_audio_to_finish)
         if audio_file:
             self.play_audio_file(audio_file, should_cache, wait_for_audio_to_finish)
+        elif pre_audio_file and not message:
+            self.play_audio_file(pre_audio_file, should_cache, wait_for_audio_to_finish)
         if handle_action:
             self.handle_action(action)
         self.scheduled_post_action = post_action
@@ -357,6 +366,11 @@ class Call(pj.Call):
         elif self.current_playback and self.current_playback['type'] == 'message':
             self.trigger_webhook({'event': 'playback_done', 'type': 'message', 'message': self.current_playback['message']})
         self.current_playback = None
+        if self.pending_message:
+            message, language, should_cache, wait_for_audio_to_finish = self.pending_message
+            self.pending_message = None
+            self.play_message(message, language, should_cache, wait_for_audio_to_finish)
+            return
         self.playback_is_done = True
         self.player = None
 

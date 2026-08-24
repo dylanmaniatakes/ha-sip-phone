@@ -119,3 +119,95 @@ send_dtmf:
           min: 1
           max: 3
           mode: box
+announce:
+  name: Call and announce
+  description: Call a destination, play a chime or audio file, announce text, then hang up.
+  fields:
+    destination:
+      name: Destination
+      description: An extension, a user@host address, or a full SIP URI.
+      required: true
+      selector:
+        text:
+    message:
+      name: Message
+      description: Text to synthesize through the gateway's configured Home Assistant TTS engine.
+      selector:
+        text:
+          multiline: true
+    chime_file:
+      name: Chime file
+      description: Optional absolute audio path, such as /media/chime_tts/custom_chimes/bell.mp3, played before the message.
+      selector:
+        text:
+    audio_file:
+      name: Audio file
+      description: An absolute audio path to play instead of a message. It cannot be combined with message or chime_file.
+      selector:
+        text:
+    entry_id:
+      name: SIP Phone entry
+      selector:
+        config_entry:
+          integration: sip_phone
+    sip_account:
+      name: SIP account
+      selector:
+        number:
+          min: 1
+          max: 3
+          mode: box
+    ring_timeout:
+      name: Ring timeout
+      selector:
+        number:
+          min: 1
+          max: 3600
+          unit_of_measurement: seconds
+          mode: box
+bridge_audio:
+  name: Bridge audio
+  description: Bridge two active SIP calls so callers can talk to each other.
+  fields:
+    destination:
+      name: First call
+      description: The first call's internal_id or destination.
+      required: true
+      selector:
+        text:
+    bridge_to:
+      name: Second call
+      description: The destination or SIP URI of the second active call.
+      required: true
+      selector:
+        text:
+    entry_id:
+      name: SIP Phone entry
+      selector:
+        config_entry:
+          integration: sip_phone
+connect_assist:
+  name: Connect to Assist
+  description: Answer an incoming SIP call and bridge it to the configured Home Assistant Voice over IP endpoint.
+  fields:
+    destination:
+      name: Incoming call identifier
+      description: The internal_id from a sip_phone.call_event with event set to incoming_call.
+      required: true
+      selector:
+        text:
+    timeout:
+      name: Connection timeout
+      description: Seconds to wait for the Home Assistant Assist endpoint to answer.
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 120
+          unit_of_measurement: seconds
+          mode: box
+    entry_id:
+      name: SIP Phone entry
+      selector:
+        config_entry:
+          integration: sip_phone

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+import asyncio
 import json
 import logging
 from typing import Any
@@ -10,7 +11,7 @@ from typing import Any
 from homeassistant.components import mqtt
 from homeassistant.core import HomeAssistant
 
-from .const import CONF_COMMAND_TOPIC, CONF_DEFAULT_ACCOUNT, CONF_EVENT_TOPIC, CONF_SIP_DOMAIN, EVENT_CALL
+from .const import CONF_ASSISTANT_URI, CONF_COMMAND_TOPIC, CONF_DEFAULT_ACCOUNT, CONF_EVENT_TOPIC, CONF_SIP_DOMAIN, EVENT_CALL
 
 _LOGGER = logging.getLogger(__name__)
 StateListener = Callable[[], None]
@@ -23,6 +24,7 @@ class SipPhoneClient:
         self.hass = hass
         self.entry_id = entry_id
         self.command_topic: str = data[CONF_COMMAND_TOPIC]
+        self.assistant_uri: str = data.get(CONF_ASSISTANT_URI, "").strip()
         self.event_topic: str = data[CONF_EVENT_TOPIC]
         self.sip_domain: str = data[CONF_SIP_DOMAIN]
         self.default_account: int = data[CONF_DEFAULT_ACCOUNT]
@@ -64,6 +66,22 @@ class SipPhoneClient:
     async def async_send(self, command: dict[str, Any]) -> None:
         """Publish a command understood by ha-sip's MQTT command client."""
         await mqtt.async_publish(self.hass, self.command_topic, json.dumps(command), qos=1, retain=False)
+
+    async def async_wait_for_event(self, predicate: Callable[[dict[str, Any]], bool], timeout: float) -> dict[str, Any]:
+        """Wait for a gateway event matching a specific call lifecycle condition."""
+        if predicate(self.last_event):
+            return self.last_event
+        future: asyncio.Future[dict[str, Any]] = asyncio.get_running_loop().create_future()
+
+        def event_received() -> None:
+            if not future.done() and predicate(self.last_event):
+                future.set_result(self.last_event)
+
+        unsubscribe = self.async_add_listener(event_received)
+        try:
+            return await asyncio.wait_for(future, timeout)
+        finally:
+            unsubscribe()
 
     async def _async_handle_event(self, message: mqtt.ReceiveMessage) -> None:
         """Update the Home Assistant representation of a gateway call event."""

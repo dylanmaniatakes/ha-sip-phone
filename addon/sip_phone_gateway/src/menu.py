@@ -19,6 +19,7 @@ class MenuFromStdin(TypedDict):
     message: Optional[str]
     handle_as_template: Optional[bool]
     audio_file: Optional[str]
+    pre_audio_file: Optional[str]
     language: Optional[str]
     action: Optional[Command]
     choices_are_pin: Optional[bool]
@@ -34,6 +35,7 @@ class Menu(TypedDict):
     message: Optional[str]
     handle_as_template: bool
     audio_file: Optional[str]
+    pre_audio_file: Optional[str]
     language: str
     action: Optional[Command]
     choices_are_pin: bool
@@ -114,6 +116,7 @@ def _normalize_menu(
         'message': menu.get('message'),
         'handle_as_template': menu.get('handle_as_template') or False,
         'audio_file': menu.get('audio_file'),
+        'pre_audio_file': menu.get('pre_audio_file'),
         'language': menu.get('language') or default_language,
         'action': menu.get('action'),
         'choices_are_pin': menu.get('choices_are_pin') or False,
@@ -159,6 +162,7 @@ def _get_default_menu(parent_menu: Menu) -> Menu:
         'message': 'Unknown option',
         'handle_as_template': False,
         'audio_file': None,
+        'pre_audio_file': None,
         'language': 'en',
         'action': None,
         'choices_are_pin': False,
@@ -179,6 +183,7 @@ def _get_timeout_menu(parent_menu: Menu) -> Menu:
         'message': None,
         'handle_as_template': False,
         'audio_file': None,
+        'pre_audio_file': None,
         'language': 'en',
         'action': None,
         'choices_are_pin': False,
@@ -199,6 +204,7 @@ def _get_standard_menu() -> Menu:
         'message': None,
         'handle_as_template': False,
         'audio_file': None,
+        'pre_audio_file': None,
         'language': 'en',
         'action': None,
         'choices_are_pin': False,

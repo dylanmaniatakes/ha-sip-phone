@@ -13,9 +13,11 @@ from homeassistant.helpers import config_validation as cv
 
 from .client import SipPhoneClient
 from .const import (
-    ATTR_DESTINATION, ATTR_DIGITS, ATTR_ENTRY_ID, ATTR_METHOD, ATTR_RING_TIMEOUT,
-    ATTR_SIP_ACCOUNT, ATTR_SIP_CODE, DATA_CLIENTS, DOMAIN, DTMF_METHODS, PLATFORMS,
-    SERVICE_ANSWER, SERVICE_DIAL, SERVICE_HANGUP, SERVICE_SEND_DTMF,
+    ATTR_AUDIO_FILE, ATTR_CHIME_FILE, ATTR_DESTINATION, ATTR_DIGITS, ATTR_ENTRY_ID,
+    ATTR_MESSAGE, ATTR_METHOD, ATTR_RING_TIMEOUT, ATTR_SIP_ACCOUNT, ATTR_SIP_CODE,
+    ATTR_TIMEOUT, DATA_CLIENTS, DOMAIN, DTMF_METHODS, PLATFORMS, SERVICE_ANSWER,
+    SERVICE_ANNOUNCE, SERVICE_BRIDGE_AUDIO, SERVICE_CONNECT_ASSIST, SERVICE_DIAL,
+    SERVICE_HANGUP, SERVICE_SEND_DTMF,
 )
 
 SERVICE_BASE_SCHEMA = vol.Schema({
@@ -42,6 +44,21 @@ async def async_setup(hass: HomeAssistant, _: dict[str, Any]) -> bool:
     }))
     hass.services.async_register(DOMAIN, SERVICE_ANSWER, _async_answer, schema=_schema({
         vol.Required(ATTR_DESTINATION): cv.string,
+    }))
+    hass.services.async_register(DOMAIN, SERVICE_ANNOUNCE, _async_announce, schema=_schema({
+        vol.Required(ATTR_DESTINATION): cv.string,
+        vol.Optional(ATTR_MESSAGE): cv.string,
+        vol.Optional(ATTR_CHIME_FILE): cv.string,
+        vol.Optional(ATTR_AUDIO_FILE): cv.string,
+        vol.Optional(ATTR_RING_TIMEOUT): vol.All(vol.Coerce(float), vol.Range(min=1, max=3600)),
+    }))
+    hass.services.async_register(DOMAIN, SERVICE_BRIDGE_AUDIO, _async_bridge_audio, schema=_schema({
+        vol.Required(ATTR_DESTINATION): cv.string,
+        vol.Required("bridge_to"): cv.string,
+    }))
+    hass.services.async_register(DOMAIN, SERVICE_CONNECT_ASSIST, _async_connect_assist, schema=_schema({
+        vol.Required(ATTR_DESTINATION): cv.string,
+        vol.Optional(ATTR_TIMEOUT, default=20): vol.All(vol.Coerce(float), vol.Range(min=1, max=120)),
     }))
     hass.services.async_register(DOMAIN, SERVICE_SEND_DTMF, _async_send_dtmf, schema=_schema({
         vol.Required(ATTR_DESTINATION): cv.string,
@@ -125,3 +142,57 @@ async def _async_send_dtmf(call: ServiceCall) -> None:
     client = _get_client(call.hass, call)
     destination, account = _command_target(client, call)
     await client.async_send({"command": "send_dtmf", "number": destination, "sip_account": account, "digits": call.data[ATTR_DIGITS], "method": call.data[ATTR_METHOD]})
+
+
+async def _async_announce(call: ServiceCall) -> None:
+    """Call a destination, play a chime or audio file, announce text, then hang up."""
+    client = _get_client(call.hass, call)
+    destination, account = _command_target(client, call)
+    message = call.data.get(ATTR_MESSAGE, "").strip()
+    chime_file = call.data.get(ATTR_CHIME_FILE, "").strip()
+    audio_file = call.data.get(ATTR_AUDIO_FILE, "").strip()
+    if not any((message, chime_file, audio_file)):
+        raise HomeAssistantError("Provide message, chime_file, or audio_file for an announcement")
+    if audio_file and (message or chime_file):
+        raise HomeAssistantError("audio_file cannot be combined with message or chime_file")
+    menu: dict[str, Any] = {
+        "post_action": "hangup",
+        "wait_for_audio_to_finish": True,
+        "cache_audio": True,
+    }
+    if message:
+        menu[ATTR_MESSAGE] = message
+    if chime_file:
+        menu["pre_audio_file"] = chime_file
+    if audio_file:
+        menu[ATTR_AUDIO_FILE] = audio_file
+    command: dict[str, Any] = {"command": "dial", "number": destination, "sip_account": account, "menu": menu}
+    if ATTR_RING_TIMEOUT in call.data:
+        command[ATTR_RING_TIMEOUT] = call.data[ATTR_RING_TIMEOUT]
+    await client.async_send(command)
+
+
+async def _async_bridge_audio(call: ServiceCall) -> None:
+    """Bridge the media streams of two active calls."""
+    client = _get_client(call.hass, call)
+    destination, account = _command_target(client, call)
+    bridge_to = client.format_destination(call.data["bridge_to"])
+    await client.async_send({"command": "bridge_audio", "number": destination, "bridge_to": bridge_to, "sip_account": account})
+
+
+async def _async_connect_assist(call: ServiceCall) -> None:
+    """Answer an incoming call and connect it to the configured Assist VoIP endpoint."""
+    client = _get_client(call.hass, call)
+    if not client.assistant_uri:
+        raise HomeAssistantError("Configure the Home Assistant Assist SIP URI before using connect_assist")
+    call_id = call.data[ATTR_DESTINATION].strip()
+    account = call.data.get(ATTR_SIP_ACCOUNT, client.default_account)
+    timeout = call.data.get(ATTR_TIMEOUT, 20)
+    assistant_uri = client.format_destination(client.assistant_uri)
+    await client.async_send({"command": "answer", "number": call_id, "sip_account": account})
+    await client.async_send({"command": "dial", "number": assistant_uri, "sip_account": account, "ring_timeout": timeout})
+    await client.async_wait_for_event(
+        lambda event: event.get("event") == "call_established" and event.get("internal_id") == assistant_uri,
+        timeout,
+    )
+    await client.async_send({"command": "bridge_audio", "number": call_id, "bridge_to": assistant_uri, "sip_account": account})
