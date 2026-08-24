@@ -7,7 +7,7 @@
         "aarch64",
         "amd64"
     ],
-    "init": "false",
+    "init": false,
     "startup": "application",
     "boot": "auto",
     "options": {
