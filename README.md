@@ -108,10 +108,6 @@ This repository is intentionally a HACS integration, not a second SIP media stac
 
 The status sensor reflects gateway events. It is `idle` until an event is received after Home Assistant starts, so it is a call indicator rather than a SIP registration-health check.
 
-## Publishing
-
-Add the repository's public documentation and issue-tracker URLs to `custom_components/sip_phone/manifest.json` before publication. The included workflows validate the integration with HACS and Home Assistant.
-
 ## License
 
 Apache-2.0. This project interoperates with, but does not include code from, the separately licensed ha-sip project.
